@@ -81,7 +81,10 @@ func makeItem(items []Item, rssObejct rss.Channel) []Item {
 					if err != nil {
 						date, err = time.Parse("02 Jan 2006 15:04:05 GMT", string(item.PubDate))
 						if err != nil {
-							log.Fatal("Date: ", err)
+							date, err = time.Parse("Mon, 02 Jan 2006 15:04:05 MSK", string(item.PubDate))
+							if err != nil {
+								log.Fatal("Date: ", err)
+							}
 						}
 					}
 				}
@@ -117,12 +120,11 @@ func makeOneNews(w http.ResponseWriter, rssObject rss.Channel) {
 }
 
 func makeNews(w http.ResponseWriter, r *http.Request) {
-	rssObject, err := rss.ParseRSS("https://rg.ru/xml/index.xml")
-	rssObject1, err1 := rss.ParseRSS("https://lenta.ru/rss")
+	rssObject, err := rss.ParseRSS("https://lenta.ru/rss")
+	rssObject1, err1 := rss.ParseRSS("http://technolog.edu.ru/index.php?option=com_k2&view=itemlist&layout=category&task=category&id=8&lang=ru&format=feed")
 	rssObject2, err2 := rss.ParseRSS("https://news.mail.ru/rss/90/")
 
 	if err != nil && err1 != nil && err2 != nil {
-
 		items := make([]Item, 0, 1)
 		items = makeItem(items, rssObject.Channel)
 		items = makeItem(items, rssObject1.Channel)
@@ -138,7 +140,6 @@ func makeNews(w http.ResponseWriter, r *http.Request) {
 		if err := tmpl.ExecuteTemplate(w, "news", items); err != nil {
 			log.Fatal("Error news.html :", err)
 		}
-
 	}
 }
 
@@ -147,12 +148,11 @@ func makeNewsLenta(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		makeOneNews(w, rssObject.Channel)
-
 	}
 }
 
-func makeNewsRG(w http.ResponseWriter, r *http.Request) {
-	rssObject, err := rss.ParseRSS("https://rg.ru/xml/index.xml")
+func makeNewsTech(w http.ResponseWriter, r *http.Request) {
+	rssObject, err := rss.ParseRSS("http://technolog.edu.ru/index.php?option=com_k2&view=itemlist&layout=category&task=category&id=8&lang=ru&format=feed")
 
 	if err != nil {
 		makeOneNews(w, rssObject.Channel)
@@ -206,13 +206,22 @@ func makeNewsServer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func general(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hi guys/n"))
+
+	w.Write([]byte(r.URL.Path))
+}
+
 func main() {
 	println("Server listen on port 9005")
+
 	http.HandleFunc("/news", makeNews)
-	http.HandleFunc("/newsLenta", makeNewsLenta)
-	http.HandleFunc("/newsRG", makeNewsRG)
-	http.HandleFunc("/newsMail", makeNewsMail)
+	http.HandleFunc("/news-lenta", makeNewsLenta)
+	http.HandleFunc("/news-mail", makeNewsMail)
+	http.HandleFunc("/news-tech", makeNewsTech)
 	http.HandleFunc("/server", makeNewsServer)
+	http.HandleFunc("/", general)
+
 	err := http.ListenAndServe(":9005", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
