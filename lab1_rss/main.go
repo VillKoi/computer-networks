@@ -13,8 +13,12 @@ import (
 )
 
 type rssO struct {
-	Header Heading
-	Items  []Item
+	Header      Heading
+	Items       []Item
+	NewsActive  bool
+	LentaActive bool
+	TechActive  bool
+	MailActive  bool
 }
 
 type Heading struct {
@@ -91,7 +95,11 @@ func makeItem(items []Item, rssObejct rss.Channel) []Item {
 			}
 		}
 		number := date.Year()*10000000000 + int(date.Month())*100000000 + date.Day()*1000000 + date.Hour()*100*100 + date.Minute()*100 + date.Second()
-		item0 := Item{number, item.XMLName, item.Title, len(item.Title) != 0, item.Link,
+		item0 := Item{
+			number,
+			item.XMLName,
+			item.Title,
+			len(item.Title) != 0, item.Link,
 			len(item.Link) != 0, item.Description, item.Author, item.Category.Value,
 			len(item.Category.Value) != 0, item.Comments, Guid{item.Guid.XMLName, item.Guid.PermaLink,
 				item.Guid.Value}, string(item.PubDate),
@@ -101,19 +109,41 @@ func makeItem(items []Item, rssObejct rss.Channel) []Item {
 	return items
 }
 
-func makeOneNews(w http.ResponseWriter, rssObject rss.Channel) {
-	head := Heading{rssObject.Title, len(rssObject.Title) != 0, rssObject.Generator,
+func makeOneNews(w http.ResponseWriter, rssObject rss.Channel, linkName string) {
+	head := Heading{
+		rssObject.Title, len(rssObject.Title) != 0, rssObject.Generator,
 		rssObject.LastBuildDate, rssObject.Description, len(rssObject.Items)}
 
 	items := make([]Item, 0, 1)
 	items = makeItem(items, rssObject)
 
-	tmpl, err := template.ParseFiles("oneNews.html", "header.html", "footer.html")
+	header, err := template.ParseFiles("header.html")
 	if err != nil {
 		log.Fatal("Error news.html :", err)
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "oneNews", rssO{head, items}); err != nil {
+	tmpl, err := template.ParseFiles("oneNews.html", "footer.html")
+	if err != nil {
+		log.Fatal("Error news.html :", err)
+	}
+
+	if err := header.ExecuteTemplate(w, "header", rssO{
+		Header:      head,
+		Items:       items,
+		LentaActive: linkName == "lenta",
+		TechActive:  linkName == "tech",
+		MailActive:  linkName == "mail",
+	}); err != nil {
+		log.Fatal("Error news.html :", err)
+	}
+
+	if err := tmpl.ExecuteTemplate(w, "oneNews", rssO{
+		Header:      head,
+		Items:       items,
+		LentaActive: linkName == "lenta",
+		TechActive:  linkName == "tech",
+		MailActive:  linkName == "mail",
+	}); err != nil {
 		log.Fatal("Error news.html :", err)
 	}
 
@@ -132,12 +162,35 @@ func makeNews(w http.ResponseWriter, r *http.Request) {
 
 		sort.Sort(News(items))
 
-		tmpl, err := template.ParseFiles("news.html", "header.html", "footer.html")
+		head := Heading{
+			Title:    "Все новости",
+			TitleLen: true,
+			LenItems: len(items),
+		}
+
+		header, err := template.ParseFiles("header.html")
 		if err != nil {
 			log.Fatal("Error news.html :", err)
 		}
 
-		if err := tmpl.ExecuteTemplate(w, "news", items); err != nil {
+		tmpl, err := template.ParseFiles("oneNews.html", "footer.html")
+		if err != nil {
+			log.Fatal("Error news.html :", err)
+		}
+
+		if err := header.ExecuteTemplate(w, "header", rssO{
+			Header:     head,
+			Items:      items,
+			NewsActive: true,
+		}); err != nil {
+			log.Fatal("Error news.html :", err)
+		}
+
+		if err := tmpl.ExecuteTemplate(w, "oneNews", rssO{
+			Header:     head,
+			Items:      items,
+			NewsActive: true,
+		}); err != nil {
 			log.Fatal("Error news.html :", err)
 		}
 	}
@@ -147,7 +200,7 @@ func makeNewsLenta(w http.ResponseWriter, r *http.Request) {
 	rssObject, err := rss.ParseRSS("https://lenta.ru/rss")
 
 	if err != nil {
-		makeOneNews(w, rssObject.Channel)
+		makeOneNews(w, rssObject.Channel, "lenta")
 	}
 }
 
@@ -155,7 +208,7 @@ func makeNewsTech(w http.ResponseWriter, r *http.Request) {
 	rssObject, err := rss.ParseRSS("http://technolog.edu.ru/index.php?option=com_k2&view=itemlist&layout=category&task=category&id=8&lang=ru&format=feed")
 
 	if err != nil {
-		makeOneNews(w, rssObject.Channel)
+		makeOneNews(w, rssObject.Channel, "tech")
 	}
 }
 
@@ -163,7 +216,7 @@ func makeNewsMail(w http.ResponseWriter, r *http.Request) {
 	rssObject, err := rss.ParseRSS("https://news.mail.ru/rss/90/")
 
 	if err != nil {
-		makeOneNews(w, rssObject.Channel)
+		makeOneNews(w, rssObject.Channel, "mail")
 	}
 }
 
@@ -207,7 +260,7 @@ func makeNewsServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func general(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hi guys/n"))
+	w.Write([]byte("Hi guys\n"))
 
 	w.Write([]byte(r.URL.Path))
 }

@@ -11,10 +11,14 @@
 <body>
     <header>
         <ul class="nav nav-pills">
-            <li role="presentation" class="active"><a href="/news">All news</a></li>
-            <li role="presentation"><a href="/news-lenta">Lenta</a></li>
-            <li role="presentation"><a href="/news-tech">Tech</a></li>
-            <li role="presentation"><a href="/news-mail">Mail</a></li>
+            <li role="presentation" {{if .NewsActive}} class="active"{{end}}>
+                <a href="/news">All news</a></li>
+            <li role="presentation" {{if .LentaActive}} class="active"{{end}}>
+                <a href="/news-lenta">Lenta</a></li>
+            <li role="presentation" {{if .TechActive}} class="active"{{end}}>
+                <a href="/news-tech">Tech</a></li>
+            <li role="presentation" {{if .MailActive}} class="active"{{end}}>
+                <a href="/news-mail">Mail</a></li>
         </ul>
     </header>
 
