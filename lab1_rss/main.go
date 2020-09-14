@@ -122,7 +122,7 @@ func makeOneNews(w http.ResponseWriter, rssObject rss.Channel, linkName string) 
 		log.Fatal("Error news.html :", err)
 	}
 
-	tmpl, err := template.ParseFiles("oneNews.html", "footer.html")
+	tmpl, err := template.ParseFiles("news.html", "footer.html")
 	if err != nil {
 		log.Fatal("Error news.html :", err)
 	}
@@ -137,7 +137,7 @@ func makeOneNews(w http.ResponseWriter, rssObject rss.Channel, linkName string) 
 		log.Fatal("Error news.html :", err)
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "oneNews", rssO{
+	if err := tmpl.ExecuteTemplate(w, "news", rssO{
 		Header:      head,
 		Items:       items,
 		LentaActive: linkName == "lenta",
@@ -173,7 +173,7 @@ func makeNews(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("Error news.html :", err)
 		}
 
-		tmpl, err := template.ParseFiles("oneNews.html", "footer.html")
+		tmpl, err := template.ParseFiles("news.html", "footer.html")
 		if err != nil {
 			log.Fatal("Error news.html :", err)
 		}
@@ -186,7 +186,7 @@ func makeNews(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("Error news.html :", err)
 		}
 
-		if err := tmpl.ExecuteTemplate(w, "oneNews", rssO{
+		if err := tmpl.ExecuteTemplate(w, "news", rssO{
 			Header:     head,
 			Items:      items,
 			NewsActive: true,
