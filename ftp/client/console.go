@@ -9,7 +9,7 @@ import (
 )
 
 type FTPClient struct {
-	ftp *ftp.ServerConn
+	FTP *ftp.ServerConn
 }
 
 // put local/example.txt server/new_file.txt
@@ -19,13 +19,13 @@ func (c FTPClient) StoreFile(path, file string) error {
 		return err
 	}
 	buffer := bytes.NewBuffer(data)
-	err = c.ftp.Stor(path, buffer)
+	err = c.FTP.Stor(path, buffer)
 	return err
 }
 
 // get example.txt new_file.txt
 func (c FTPClient) ReadFile(path, newPath string) error {
-	r, err := c.ftp.Retr(path)
+	r, err := c.FTP.Retr(path)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (c FTPClient) ReadFile(path, newPath string) error {
 
 // pwd
 func (c FTPClient) CurrentDir() error {
-	pwd, err := c.ftp.CurrentDir()
+	pwd, err := c.FTP.CurrentDir()
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (c FTPClient) CurrentDir() error {
 
 // ls
 func (c FTPClient) List(path string) error {
-	list, err := c.ftp.NameList(path)
+	list, err := c.FTP.NameList(path)
 	if err != nil {
 		return err
 	}
@@ -62,12 +62,12 @@ func (c FTPClient) List(path string) error {
 
 // cd
 func (c FTPClient) ChangeDir(path string) error {
-	err := c.ftp.ChangeDir(path)
+	err := c.FTP.ChangeDir(path)
 	return err
 }
 
 // mkdir
 func (c FTPClient) MakeDir(path string) error {
-	err := c.ftp.MakeDir(path)
+	err := c.FTP.MakeDir(path)
 	return err
 }
