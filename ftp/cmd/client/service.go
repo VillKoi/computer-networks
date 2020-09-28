@@ -6,24 +6,20 @@ import (
 	"net/http"
 
 	"github.com/VillKoi/computer-networks/ftp/client"
+	"github.com/go-chi/chi"
 	"golang.org/x/sync/errgroup"
 )
 
-func StartHTTP(ctx context.Context, c *client.FTPClient) {
+func StartHTTP(ctx context.Context, c *client.FTPClient) error {
+	router := chi.NewRouter()
 
-	mux := http.NewServeMux()
+	router.Post("/auth", c.Auth)
 
-	mux.HandleFunc("/auth", c.Auth)
-
-	var handler http.Handler = mux
-
-	// for _, m := range middlewares {
-	// 	handler = m(handler)
-	// }
+	router.Get("/ls", c.Ls)
 
 	srv := http.Server{
 		Addr:    httpport,
-		Handler: handler,
+		Handler: router,
 	}
 
 	group := errgroup.Group{}
@@ -34,4 +30,11 @@ func StartHTTP(ctx context.Context, c *client.FTPClient) {
 		}
 		return nil
 	})
+
+	group.Go(func() error {
+		<-ctx.Done()
+		return srv.Shutdown(ctx)
+	})
+
+	return group.Wait()
 }

@@ -79,3 +79,9 @@ func (c FTPClient) MakeDir(path string) error {
 	err := c.FTP.MakeDir(path)
 	return err
 }
+
+// delete path/example.txt
+func (c FTPClient) Delete(path string) error {
+	err := c.FTP.Delete(path)
+	return err
+}
