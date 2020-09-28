@@ -4,12 +4,20 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/jlaffaye/ftp"
 )
 
 type FTPClient struct {
-	FTP *ftp.ServerConn
+	FTP        *ftp.ServerConn
+	HttpClient *http.Client
+}
+
+func NewFTPClient() FTPClient {
+	return FTPClient{
+		HttpClient: &http.Client{},
+	}
 }
 
 // put local/example.txt server/new_file.txt
