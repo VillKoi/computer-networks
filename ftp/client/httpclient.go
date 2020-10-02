@@ -16,6 +16,11 @@ type Credentials struct {
 }
 
 func (c *FTPClient) Auth(w http.ResponseWriter, r *http.Request) {
+	allowedHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization,X-CSRF-Token"
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", allowedHeaders)
+
 	var err error
 	var credentials Credentials
 
