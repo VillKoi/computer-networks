@@ -20,7 +20,8 @@ func StartHTTP(ctx context.Context, c *client.FTPClient) error {
 
 	cor := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:1234"},
-		AllowedMethods:   []string{"GET", "POST", "DELETE"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Content-Type"},
 		AllowCredentials: true,
 	})
 

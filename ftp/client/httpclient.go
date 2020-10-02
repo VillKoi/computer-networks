@@ -16,6 +16,8 @@ type Credentials struct {
 }
 
 func (c *FTPClient) Auth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	var err error
 	var credentials Credentials
 
