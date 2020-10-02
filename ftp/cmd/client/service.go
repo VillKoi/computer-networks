@@ -7,6 +7,7 @@ import (
 
 	"github.com/VillKoi/computer-networks/ftp/client"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -17,9 +18,15 @@ func StartHTTP(ctx context.Context, c *client.FTPClient) error {
 
 	router.Get("/ls", c.Ls)
 
+	cor := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:1234"},
+		AllowedMethods:   []string{"GET", "POST", "DELETE"},
+		AllowCredentials: true,
+	})
+
 	srv := http.Server{
 		Addr:    httpport,
-		Handler: router,
+		Handler: cor.Handler(router),
 	}
 
 	group := errgroup.Group{}
